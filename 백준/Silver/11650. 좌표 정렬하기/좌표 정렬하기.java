@@ -1,9 +1,8 @@
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -22,65 +21,26 @@ public class Main {
         }
 
         //정렬한다.
-        mergeSort(points, 0, N - 1);
+        points.sort(new Comparator<Point>() {
+            @Override
+            public int compare(Point point1, Point point2) {
+                if (point1.getX() > point2.getX()) {
+                    return 1;
+                }
+                if (point1.getX() == point2.getX()) {
+                    if (point1.getY() > point2.getY()) {
+                        return 1;
+                    }
+                    return -1;
+                }
+                return -1;
+            }
+        });
 
         //결과를 출력한다.
-        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
-        for (Point point : points) {
-            bw.write(Integer.toString(point.getX()) + " " + Integer.toString(point.getY()) + "\n");
-        }
-        bw.flush();
-        bf.close();
-        bw.close();
-    }
-
-    private static void mergeSort(List<Point> points, int first, int last) {
-        if (first < last) {
-            int mid = (first + last) / 2;
-
-            mergeSort(points, first, mid);
-            mergeSort(points, mid + 1, last);
-
-            merge(points, first, mid, last);
-        }
-
-    }
-
-    private static void merge(List<Point> points, int first, int mid, int last) {
-        int leftFirstIndex = first;
-        int rightFirstIndex = mid + 1;
-
-        List<Point> sortedPoints = new ArrayList<>();
-
-        while (leftFirstIndex <= mid && rightFirstIndex <= last) {
-            Point leftPoint = points.get(leftFirstIndex);
-            Point rightPoint = points.get(rightFirstIndex);
-            if (leftPoint.getX() < rightPoint.getX()) {
-                sortedPoints.add(leftPoint);
-                leftFirstIndex++;
-            } else if (leftPoint.getX() == rightPoint.getX()) {
-                if (leftPoint.getY() <= rightPoint.getY()) {
-                    sortedPoints.add(leftPoint);
-                    leftFirstIndex++;
-                } else {
-                    sortedPoints.add(rightPoint);
-                    rightFirstIndex++;
-                }
-            } else {
-                sortedPoints.add(rightPoint);
-                rightFirstIndex++;
-            }
-        }
-
-        if (leftFirstIndex > mid) {
-            sortedPoints.addAll(points.subList(rightFirstIndex, last + 1));
-        } else {
-            sortedPoints.addAll(points.subList(leftFirstIndex, mid + 1));
-        }
-
-        for (int i = first; i <= last; i++) {
-            points.set(i, sortedPoints.get(i - first));
-        }
+        StringBuilder sb = new StringBuilder();
+        points.forEach(point -> sb.append(point.getX() + " " + point.getY() + "\n"));
+        System.out.println(sb);
     }
 
     static class Point {
