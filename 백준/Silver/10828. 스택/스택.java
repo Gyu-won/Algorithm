@@ -7,10 +7,9 @@ import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
 public class Main {
-    public static void main(String[] args) throws IOException {
-        // Stack 구현
-        Deque<Integer> stack = new ArrayDeque<>();
+    private static final Deque<Integer> stack = new ArrayDeque<>();
 
+    public static void main(String[] args) throws IOException {
         // N을 입력받는다.
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         int N = Integer.parseInt(br.readLine());
@@ -28,16 +27,16 @@ public class Main {
                 stack.addLast(Integer.parseInt(st.nextToken()));
             }
             if (command.equals("pop")) {
-                result.append(pop(stack) + "\n");
+                result.append(pop() + "\n");
             }
             if (command.equals("size")) {
                 result.append(stack.size() + "\n");
             }
             if (command.equals("empty")) {
-                result.append(checkEmpty(stack) + "\n");
+                result.append(checkEmpty() + "\n");
             }
             if (command.equals("top")) {
-                result.append(getTop(stack) + "\n");
+                result.append(getTop() + "\n");
             }
         }
 
@@ -45,7 +44,7 @@ public class Main {
         System.out.println(result);
     }
 
-    private static Integer getTop(Deque<Integer> stack) {
+    private static Integer getTop() {
         try {
             return stack.getLast();
         } catch (NoSuchElementException exception) {
@@ -53,14 +52,14 @@ public class Main {
         }
     }
 
-    private static Integer checkEmpty(Deque<Integer> stack) {
+    private static Integer checkEmpty() {
         if (stack.isEmpty()) {
             return 1;
         }
         return 0;
     }
 
-    private static Integer pop(Deque<Integer> stack) {
+    private static Integer pop() {
         try {
             return stack.removeLast();
         } catch (NoSuchElementException exception) {
