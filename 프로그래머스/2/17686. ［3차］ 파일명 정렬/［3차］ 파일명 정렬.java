@@ -21,7 +21,6 @@ class Solution {
     }
 
     private class FileName {
-        private int index;
         private String head;
         private String number;
         private String tail;
@@ -32,7 +31,6 @@ class Solution {
             if (matcher.find()) {
                 int start = matcher.start();
                 int end = matcher.end();
-                this.index = index;
                 head = file.substring(0, start);
                 number = file.substring(start, end);
                 tail = file.substring(end);
@@ -54,9 +52,6 @@ class Solution {
             if (compareFlag == 0) {
                 int number1 = Integer.parseInt(fileName1.number);
                 int number2 = Integer.parseInt(fileName2.number);
-                if (number1 - number2 == 0) {
-                    return fileName1.index - fileName2.index;
-                }
                 return number1 - number2;
             }
             return compareFlag;
