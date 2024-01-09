@@ -1,4 +1,3 @@
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -27,7 +26,13 @@ public class Main {
     private static String validGoldbach(int n) {
         for (int odd = 3; odd <= n / 2; odd += 2) {
             if (!notPrime[odd] && !notPrime[n - odd]) {
-                return String.valueOf(n) + " = " + String.valueOf(odd) + " + " + String.valueOf(n-odd);
+                StringBuilder str = new StringBuilder();
+                str.append(n);
+                str.append(" = ");
+                str.append(odd);
+                str.append(" + ");
+                str.append(n - odd);
+                return str.toString();
             }
         }
         return "Goldbach's conjecture is wrong.";
