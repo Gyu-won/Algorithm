@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigInteger;
 import java.util.PriorityQueue;
 import java.util.StringTokenizer;
 
@@ -11,10 +12,10 @@ public class Main {
         int numberOfCity = Integer.parseInt(br.readLine());
 
         // distances를 입력받는다.
-        int[] distances = new int[numberOfCity - 1];
+        String[] distances = new String[numberOfCity - 1];
         StringTokenizer st = new StringTokenizer(br.readLine(), " ");
         for (int i = 0; i < numberOfCity - 1; i++) {
-            distances[i] = Integer.parseInt(st.nextToken());
+            distances[i] = st.nextToken();
         }
 
         // prices를 하나씩 minHeap에 넣는다.
@@ -22,14 +23,16 @@ public class Main {
         PriorityQueue<Integer> priceMinHeap = new PriorityQueue<>();
         priceMinHeap.add(Integer.parseInt(st.nextToken()));
 
-        long minPrice = 0;
-        for (int distance : distances) {
+        BigInteger minPrice = new BigInteger("0");
+        for (String distance : distances) {
             // minHeap에서 제일 위에 값을 가져와서 distance와 곱해서 더한다.
-            minPrice += distance * priceMinHeap.peek();
+            BigInteger price = new BigInteger(distance);
+            price = price.multiply(BigInteger.valueOf(priceMinHeap.peek()));
+            minPrice = minPrice.add(price);
             priceMinHeap.add(Integer.parseInt(st.nextToken()));
         }
 
-        System.out.println(minPrice);
+        System.out.println(minPrice.toString());
     }
 }
 
