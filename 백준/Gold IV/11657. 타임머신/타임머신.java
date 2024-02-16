@@ -77,17 +77,17 @@ public class Main {
                 int dest = edge[0];
                 int price = edge[1];
                 // 경로보고, routes[도착지] 보다 작으면  routes update, queue 추가
-                if (!visited[dest] && currentP + price < roads[dest]) {
-                    roads[dest] = currentP + price;
-                    visited[dest] = true;
-                    dfs(dest, roads[dest]);
-                    visited[dest] = false;
-                }
-
                 // visited 했고, 그 경로 p + [1] - route[경로 도착지] < 0이면 return -1
                 if (visited[dest] && currentP + price - roads[dest] < 0) {
                     invalidFlag = true;
                     return;
+                }
+                
+                if (currentP + price < roads[dest]) {
+                    roads[dest] = currentP + price;
+                    visited[dest] = true;
+                    dfs(dest, roads[dest]);
+                    visited[dest] = false;
                 }
             }
         }
