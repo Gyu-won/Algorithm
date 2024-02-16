@@ -1,0 +1,9 @@
+-- 코드를 입력하세요
+SELECT name, count(*) as count
+from animal_ins
+where name is not null
+group by name
+having count(*) >= 2
+# 두번 이상 쓰인 이름, 쓰인 횟수
+# 이름이 없으면 제외
+order by name;
