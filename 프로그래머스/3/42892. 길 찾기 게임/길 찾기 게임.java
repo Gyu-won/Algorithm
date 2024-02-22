@@ -2,6 +2,8 @@ import java.util.*;
 
 class Solution {
     
+    private static int idx;
+    
     public int[][] solution(int[][] nodeinfo) {
         
         int n = nodeinfo.length;
@@ -25,22 +27,14 @@ class Solution {
         createBinaryTree(n, root, nodes);
             
         // 전위순회 O(n)
-        List<Integer> preOrderResult = new ArrayList<>();
-        preOrder(preOrderResult, root);
-        
+        idx = 0;
         int[] preOrders = new int[n];
-        for (int i = 0; i < n; i++){
-            preOrders[i] = preOrderResult.get(i);
-        }
+        preOrder(preOrders, root);
         
         // 후위순회 O(n)
-        List<Integer> postOrderResult = new ArrayList<>();
-        postOrder(postOrderResult, root);
-        
+        idx = 0;
         int[] postOrders = new int[n];
-        for (int i = 0; i < n; i++){
-            postOrders[i] = postOrderResult.get(i);
-        }
+        postOrder(postOrders, root);
         
         int[][] result = new int[2][n];
         result[0] = preOrders;
@@ -48,25 +42,20 @@ class Solution {
         return result;
     }
     
-    private static void postOrder(List<Integer> result, Node node){      
-        if (node.left != null){
+    private static void postOrder(int[] result, Node node){      
+        if (node != null){
             postOrder(result, node.left);            
-        }
-        if (node.right != null){
             postOrder(result, node.right);
+            result[idx++] = node.number;            
         }
-        result.add(node.number);
     }
     
     
-    private static void preOrder(List<Integer> result, Node node){
-        result.add(node.number);
-        
-        if (node.left != null){
+    private static void preOrder(int[] result, Node node){        
+        if (node != null){
+            result[idx++] = node.number;
             preOrder(result, node.left);            
-        }
-        if (node.right != null){
-            preOrder(result, node.right);
+            preOrder(result, node.right);               
         }
     }
     
