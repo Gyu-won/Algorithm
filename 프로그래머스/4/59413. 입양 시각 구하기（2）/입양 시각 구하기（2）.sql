@@ -1,18 +1,16 @@
--- 코드를 입력하세요
 
-set @Hour = -1;
+set @hour := -1;
 
-select (@Hour := @Hour+1) as hour, 
-    (SELECT count(*)
+select (@hour:=@hour + 1) as hour, 
+    (select count(*) as count
     from animal_outs
-     where hour(datetime) = @Hour) as count
-
+    where @hour = hour(datetime)) as count
 from animal_outs
-
-where @Hour < 23
-
-order by hour
+where @hour < 23;
 
 
 
-#17:43
+
+# 시간별로
+# 입양건수
+# 시간대 순 정렬
