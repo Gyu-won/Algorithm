@@ -68,7 +68,6 @@ public class Main {
     }
 
     private static int[][] spread(int[][] map) {
-        boolean[][] visited = new boolean[n][m];
         int[][] temp = new int[n][m];
         Deque<int[]> viruses = new ArrayDeque<>();
         for (int i = 0; i < n; i++) {
@@ -76,7 +75,6 @@ public class Main {
                 temp[i][j] = map[i][j];
                 if (temp[i][j] == 2) {
                     viruses.offer(new int[]{i, j});
-                    visited[i][j] = true;
                 }
             }
         }
@@ -90,8 +88,7 @@ public class Main {
                 int x = r + dr[d];
                 int y = c + dc[d];
 
-                if (x >= 0 && x < n && y >= 0 && y < m && temp[x][y] == 0 && !visited[x][y]) {
-                    visited[x][y] = true;
+                if (x >= 0 && x < n && y >= 0 && y < m && temp[x][y] == 0) {
                     temp[x][y] = 2;
                     viruses.offer(new int[]{x, y});
                 }
