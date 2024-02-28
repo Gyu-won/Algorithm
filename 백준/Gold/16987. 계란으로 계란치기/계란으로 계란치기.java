@@ -6,7 +6,6 @@ import java.util.StringTokenizer;
 public class Main {
 
     private static int n;
-    private static boolean[] broken;
     private static int maxBroken = 0;
 
     public static void main(String[] args) throws IOException {
@@ -24,7 +23,6 @@ public class Main {
             eggs[i] = new Egg(s, w);
         }
 
-        broken = new boolean[n];
         dfs(0, eggs);
 
         System.out.println(maxBroken);
@@ -34,7 +32,7 @@ public class Main {
         if (current == n) {
             int count = 0;
             for (int i = 0; i < n; i++) {
-                if (broken[i]) {
+                if (eggs[i].s <= 0) {
                     count++;
                 }
             }
@@ -42,11 +40,11 @@ public class Main {
             return;
         }
 
-        if (broken[current] || allBroken(current)) {
+        if (eggs[current].s <= 0 || allBroken(current, eggs)) {
             dfs(current + 1, eggs);
         } else {
             for (int i = 0; i < n; i++) {
-                if (i != current && !broken[i]) {
+                if (i != current && eggs[i].s > 0) {
                     hit(current, i, eggs);
                     dfs(current + 1, eggs);
                     rollback(current, i, eggs);
@@ -58,32 +56,16 @@ public class Main {
     private static void hit(int current, int other, Egg[] eggs) {
         eggs[current].s -= eggs[other].w;
         eggs[other].s -= eggs[current].w;
-        
-        if (eggs[current].s < 1) {
-            broken[current] = true;
-        }
-
-        if (eggs[other].s < 1) {
-            broken[other] = true;
-        }
     }
 
     private static void rollback(int current, int other, Egg[] eggs) {
         eggs[current].s += eggs[other].w;
         eggs[other].s += eggs[current].w;
-
-        if (eggs[current].s > 0) {
-            broken[current] = false;
-        }
-
-        if (eggs[other].s > 0) {
-            broken[other] = false;
-        }
     }
 
-    private static boolean allBroken(int current) {
+    private static boolean allBroken(int current, Egg[] eggs) {
         for (int i = 0; i < n; i++) {
-            if (i != current && !broken[i]) {
+            if (i != current && eggs[i].s > 0) {
                 return false;
             }
         }
