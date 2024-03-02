@@ -1,16 +1,10 @@
+set @Hour := -1;
 
-set @hour := -1;
-
-select (@hour:=@hour + 1) as hour, 
-    (select count(*) as count
-    from animal_outs
-    where @hour = hour(datetime)) as count
-from animal_outs
-where @hour < 23;
-
-
-
-
-# 시간별로
-# 입양건수
-# 시간대 순 정렬
+select a.hour, ifnull(b.cnt, 0) as count
+from (select (@Hour := @Hour + 1) as hour
+        from animal_outs
+        where @Hour < 23) a
+    left join (select hour(datetime) as hour, count(*) as cnt
+              from animal_outs
+              group by hour(datetime)) b
+    on a.hour = b.hour
