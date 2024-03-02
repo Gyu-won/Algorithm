@@ -1,12 +1,15 @@
--- 코드를 작성해주세요
 
-select info.item_id, info.item_name, info.rarity
-from item_tree tree
-    join item_info info
-    on tree.item_id = info.item_id
+# select item_id, item_name, rarity
 
-where tree.parent_item_id in (select item_id
-                        from item_info
-                        where rarity = 'rare')
-                        
-order by info.item_id desc;
+# order by item_id;
+# 희귀도 rare인 아이템
+# child 아이템 
+
+select item_id, item_name, rarity
+from item_info
+where item_id in (select tree.item_id
+                from item_info info
+                    join item_tree tree
+                    on info.item_id = tree.parent_item_id
+                where info.rarity = 'RARE')
+order by item_id desc;
