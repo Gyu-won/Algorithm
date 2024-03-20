@@ -66,7 +66,7 @@ public class Main {
                 result.append(numbers.get(i));
                 result.append(",");
             }
-            if (start < numbers.size() && start <= end) {
+            if (start <= end) {
                 result.append(numbers.get(start));
             }
         } else {
@@ -74,7 +74,7 @@ public class Main {
                 result.append(numbers.get(i));
                 result.append(",");
             }
-            if (end >= 0 && start <= end) {
+            if (start <= end) {
                 result.append(numbers.get(end));
             }
         }
