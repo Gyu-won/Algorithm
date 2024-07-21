@@ -14,20 +14,15 @@ public class Main {
 	}
 
 	private static long calculatePadoban(int n) {
-		if (n == 1) {
+		if (n < 3) {
 			return 1;
-		}
-		if (n < 5) {
-			return n / 2;
 		}
 		long[] dp = new long[n + 1];
 		dp[0] = 0;
 		dp[1] = 1;
 		dp[2] = 1;
-		dp[3] = 1;
-		dp[4] = 2;
-		for (int i = 5; i <= n; i++) {
-			dp[i] = dp[i - 1] + dp[i - 5];
+		for (int i = 3; i <= n; i++) {
+			dp[i] = dp[i - 2] + dp[i - 3];
 		}
 		return dp[n];
 	}
