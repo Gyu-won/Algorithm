@@ -1,8 +1,8 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 public class Main {
 	public static void main(String[] args) throws IOException {
@@ -11,37 +11,52 @@ public class Main {
 
 		StringBuilder testResult = new StringBuilder();
 		for (int currentTest = 0; currentTest < numberOfTest; currentTest++) {
-			List<Character> passwordKeys = guessPasswordKeys(br.readLine());
-			passwordKeys.forEach(testResult::append);
+			Password password = guessPassword(br.readLine());
+			testResult.append(password);
 			testResult.append("\n");
 		}
 		System.out.println(testResult.toString().trim());
 	}
 
-	private static List<Character> guessPasswordKeys(String keyboardInput) {
-		List<Character> password = new LinkedList<>();
-		int cursor = 0;
+	private static Password guessPassword(String keyboardInput) {
+		Deque<Character> cursorLeft = new ArrayDeque<>();
+		Deque<Character> cursorRight = new ArrayDeque<>();
+
 		for (char inputKey : keyboardInput.toCharArray()) {
-			if (inputKey == '<' && cursor > 0) {
-				cursor--;
-			} else if (inputKey == '>' && cursor < password.size()) {
-				cursor++;
-			} else if (inputKey == '-' && cursor > 0) {
-				password.remove(cursor - 1);
-				cursor--;
+			if (inputKey == '<' && !cursorLeft.isEmpty()) {
+				cursorRight.addLast(cursorLeft.removeLast());
+			} else if (inputKey == '>' && !cursorRight.isEmpty()) {
+				cursorLeft.addLast(cursorRight.removeLast());
+			} else if (inputKey == '-' && !cursorLeft.isEmpty()) {
+				cursorLeft.removeLast();
 			} else if ((inputKey >= 65 && inputKey <= 90) || (inputKey >= 97 && inputKey <= 122) || (inputKey >= '0'
 				&& inputKey <= '9')) {
-				password.add(cursor, inputKey);
-				cursor++;
+				cursorLeft.addLast(inputKey);
 			}
 		}
-		return password;
+
+		return new Password(cursorLeft, cursorRight);
+	}
+
+	private static class Password {
+		Deque<Character> cursorLeft;
+		Deque<Character> cursorRight;
+
+		Password(Deque<Character> cursorLeft, Deque<Character> cursorRight) {
+			this.cursorLeft = cursorLeft;
+			this.cursorRight = cursorRight;
+		}
+
+		@Override
+		public String toString() {
+			StringBuilder password = new StringBuilder();
+			while (!cursorLeft.isEmpty()) {
+				password.append(cursorLeft.removeFirst());
+			}
+			while (!cursorRight.isEmpty()) {
+				password.append(cursorRight.removeLast());
+			}
+			return password.toString();
+		}
 	}
 }
-
-// O(L)
-// <가 입력되면 cursor를 null이 아니면 앞으로
-// >가 입력되면 cursor를 null이 아니면 뒤로
-// 문자 입력시 새로 만들고 cursor의 next 연결 후 cursor 이동
-// -가 입력되면 cursor.prev의 next를 cursor.next로 넣고 cursor는 cursor.prev로 이동
-// 뒤에 배열을 다떙겨야하기 때문에 연결리스트로 구현
