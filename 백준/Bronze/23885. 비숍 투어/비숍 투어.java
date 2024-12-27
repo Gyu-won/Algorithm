@@ -1,3 +1,4 @@
+import java.awt.*;
 import java.util.*;
 import java.io.*;
 
@@ -19,6 +20,13 @@ class Main {
 		int endCol = Integer.parseInt(st.nextToken());
 		Point endPoint = new Point(endRow, endCol);
 
+		if (n == 1 || m == 1) {
+			if (!startPoint.samePos(endPoint)) {
+				System.out.println("NO");
+				return;
+			}
+		}
+		
 		if (startPoint.canMove(endPoint)){
 			System.out.println("YES");
 		}else{
@@ -39,6 +47,10 @@ class Main {
 			int rowDifference = Math.abs(this.r - point.r);
 			int colDifference = Math.abs(this.c - point.c);
 			return (rowDifference % 2) == (colDifference % 2);
+		}
+
+		private boolean samePos(Point point) {
+			return this.r == point.r && this.c == point.c;
 		}
 	}
 }
