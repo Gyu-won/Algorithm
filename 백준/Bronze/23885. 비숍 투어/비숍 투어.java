@@ -36,8 +36,8 @@ class Main {
 		}
 
 		private boolean canMove(Point point) {
-			int rowDifference = this.r - point.r;
-			int colDifference = this.c - point.c;
+			int rowDifference = Math.abs(this.r - point.r);
+			int colDifference = Math.abs(this.c - point.c);
 			return (rowDifference % 2) == (colDifference % 2);
 		}
 	}
