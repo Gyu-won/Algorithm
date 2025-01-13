@@ -1,6 +1,5 @@
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.Arrays;
 import java.util.StringTokenizer;
 
 class Main {
@@ -21,16 +20,12 @@ class Main {
 
 		// O(n)
 		int day = 0, quantity = 0;
-		for (int number = k + 1; number <= n; ) {
-			if (chocolates[number - k] < chocolates[number]) {
+		for (int i = 2; i <= n; i++) {
+			if (chocolates[1] < chocolates[i]) {
 				day++;
-				int difference = chocolates[number] - chocolates[number - k];
-				quantity += difference;
-				chocolates[number] -= difference;
-				Arrays.sort(chocolates);
-				continue;
+				quantity += chocolates[i] - chocolates[1];
+				chocolates[i] = chocolates[1];
 			}
-			number++;
 		}
 
 		System.out.printf("%d %d", quantity, day);
