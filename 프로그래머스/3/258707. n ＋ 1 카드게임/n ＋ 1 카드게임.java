@@ -1,88 +1,94 @@
-import java.util.*;
-
 class Solution {
     public int solution(int coin, int[] cards) {
+
+        int n = cards.length;
+        int target = n + 1;
         
-        int n = cards.length, life = 0;
-        int[] sequence = new int[n + 1];
+        // cardRound[] = -1로 기본 설정
+        int[] cardRound = new int[n+1];
         for (int i = 1; i <= n; i++) {
-            sequence[i] = -1;
+            cardRound[i] = -1;
         }
         
+        // n/3까지 cardRound[] = 0 으로 설정
         for (int i = 0; i < n/3; i++) {
-            int card = cards[i];
-            sequence[card] = i;
-            if (sequence[n + 1 -card] > -1) {
-                life++;
-            }
+            cardRound[cards[i]] = 0;
         }
-        
-        Deque<Integer> oneCoinQueue = new ArrayDeque<>();
-        Deque<Integer> twoCoinQueue = new ArrayDeque<>();
-        for (int i = n/3; i < n; i++) {
-            int card = cards[i];
-            sequence[card] = i;
-             if (sequence[n + 1 -card] > -1) {
-                if (sequence[n+1-card] < n/3) {
-                    oneCoinQueue.addLast(i);
-                }else{
-                    twoCoinQueue.addLast(i);
+
+        // 최대 n/3라운드 반복
+        int round = 1;
+        boolean roundSurvive;
+        for (; round <= n/3; round++) {
+            roundSurvive = false;
+            
+            // 뽑은 카드는 cardRound[] = round 에 저장
+            int selectIdx = n/3 + 2 * (round -1);
+            cardRound[cards[selectIdx]] = round;
+            cardRound[cards[selectIdx + 1]] = round;
+            
+            // coin 0개로 가능한지 확인: n/3 순회하면 cardRound[target - i] = 0 이면 -1로 바꾸고 통과 O(n/3)
+            for (int i = 0; i < n/3; i++) {
+                if (cardRound[target - cards[i]] == 0) {
+                    cardRound[cards[i]] = -1;
+                    cardRound[target - cards[i]] = -1;
+                    roundSurvive = true;
+                    break;
                 }
             }
-        }
-        
-        return gameStart(n, coin, life, oneCoinQueue, twoCoinQueue); 
-    }
-    
-    private static int gameStart(int n, int coin, int life, Deque<Integer> oneCoinQueue, Deque<Integer> twoCoinQueue) {
-        
-        int round = 1 + life;
-        while (round <= n/3) {
-            if (!oneCoinQueue.isEmpty() && (oneCoinQueue.getFirst() - n/3) / 2 < round) {
-                if (coin >= 1) {
-                    coin--;
-                    round++;
-                    oneCoinQueue.removeFirst();
-                    continue;
-                }
+            
+            if (roundSurvive) {
+                continue;
+            }
+            
+            // coin 1개로 가능한지 확인: coin > 0 일때
+            if (coin < 1) {
                 break;
             }
-            if (!twoCoinQueue.isEmpty() && (twoCoinQueue.getFirst() - n/3) / 2 < round) {
-                if (coin >= 2){
-                    coin -= 2;
-                    round++;
-                    twoCoinQueue.removeFirst();
-                    continue;
+            
+            // n/3 순회하며 cardRound[target - i] > 0 이면 -1로 바꾸고, coin -= 1, 통과 O(n/3)
+            for (int i = 0; i < n/3; i++) {
+                if (cardRound[target - cards[i]] > 0) {
+                    cardRound[cards[i]] = -1;
+                    cardRound[target - cards[i]] = -1;
+                    roundSurvive = true;
+                    coin -= 1;
+                    break;
                 }
             }
-            return round;
+            
+            if (roundSurvive) {
+                continue;
+            }
+            
+            // coin 2개로 가능한지 확인:
+            if (coin < 2) {
+                break;
+            }
+            
+            // n/3 부터 현재 위치까지 순회하며 cardRound[target -i] > 0 이면 -1로 바꾸고 coin -= 2 통과 O(2*n/3)    
+            for (int i = n/3; i < selectIdx + 2; i++) {
+                if (cardRound[target - cards[i]] > 0) {
+                    cardRound[cards[i]] = -1;
+                    cardRound[target - cards[i]] = -1;
+                    roundSurvive = true;
+                    coin -= 2;
+                    break;
+                }
+            }
+            
+            if (!roundSurvive) {
+                break;
+            }
         }
+        
         return round;
     }
 }
 
-// n/3까지 for문 돌면서도 sequence에 자기 순서 넣고, 
-    // sequence[13-n]이 -1보다 크면 
-        // life++
-// for문 돌면서 sequence에 자기 순서 넣기
-    // sequence[13-n]이 -1보다 크면 
-        // n/3보다 작을 떄는 oneCoinQueue에 넣기
-        // 크거나 같으면 twoCoinQueue에 넣기
-// round 값 1로 세팅 후
-// (oneCoinQueue.getFirst()- n/3) / 2 < round + life
-    // coin >= 1이면 true면 coin--, round++, continue
-    // < 1이면 break;
-// 아니면  (twoCoinQueue.getFirst() - n/3) / 2 < round + life
-    // coin >= 2이면, true 면  coint -=2, round++, continue
-    // < 2면 break;
-// break;
-// return round + life;
-
-// 13:14 - 14:35
-// n+1을 만들고 못만들면 종료
-// 결과: 게임에서 도달할 수 있는 최대 라운드 수
-// 완전 탐색
-// 카드 다 받는 경우, a만, b만 받는경우, 안받는 경우
-// n/3 -> 최대 333라운드
+// 카드 n/3개 가짐, 동전 coin 개
+// 라운드 마다 카드 2개씩 뽑음, 동전 하나써서 가지거나 버리거나
+// 카드 적힌 값이 n+1이 되도록 내면 다음 라운드 
+// n+1을 못내거나 카드 못 뽑으면 게임 종료
 
 
+// O(n^2)
