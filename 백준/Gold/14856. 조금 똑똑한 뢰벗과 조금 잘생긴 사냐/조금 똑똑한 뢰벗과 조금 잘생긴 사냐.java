@@ -1,62 +1,60 @@
-import java.awt.*;
-import java.sql.SQLOutput;
-import java.time.Month;
-import java.util.*;
-import java.io.*;
-import java.util.List;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 class Main {
+
+	private static long[] fibonacci = new long[86];
+
 	public static void main(String[] args) throws Exception {
+		// long n 입력
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		long n = Long.parseLong(br.readLine());
 
-		List<Long> fibonacciList = calculateFibonacci(n);
-		Deque<Long> fibonacciQueue = new ArrayDeque<>();
+		// 피보나치 수열 구하기
+		fibonacci[0] = 1;
+		fibonacci[1] = 2;
+		for (int i = 2; i < 86; i++) {
+			fibonacci[i] = fibonacci[i - 2] + fibonacci[i - 1];
+		}
+
+		// n 보다 작은 제일 큰 피보나치 수 빼기
+		Deque<Long> fibonacciStack = new ArrayDeque<>();
 		while (n > 0) {
-			int idx = Collections.binarySearch(fibonacciList, n);
-			if (idx >= 0) {
-				fibonacciQueue.addLast(fibonacciList.get(idx));
-				break;
-			}
-			long maxFibonacci = fibonacciList.get((idx * -1 - 2));
-			fibonacciQueue.addLast(maxFibonacci);
+			// 최대 피보나치 수 찾기: O(log 86)
+			long maxFibonacci = findMaxFibonacci(n);
+
+			// 값 빼기
 			n -= maxFibonacci;
+			fibonacciStack.addLast(maxFibonacci);
 		}
 
 		StringBuilder result = new StringBuilder();
-		result.append(fibonacciQueue.size());
+		result.append(fibonacciStack.size());
 		result.append("\n");
-		while(!fibonacciQueue.isEmpty()){
-			result.append(fibonacciQueue.removeLast());
+		while (!fibonacciStack.isEmpty()) {
+			result.append(fibonacciStack.removeLast());
 			result.append(" ");
 		}
 		System.out.println(result.toString().trim());
 	}
 
-	private static List<Long> calculateFibonacci(long n){
-		List<Long> fibonnaciList = new ArrayList<>();
-		fibonnaciList.add(1L);
-		fibonnaciList.add(2L);
+	private static long findMaxFibonacci(long n) {
+		int left = 0;
+		int right = fibonacci.length - 1;
 
-		for (int i = 2; i < 100; i++) {
-			long f1 = fibonnaciList.get(i - 2);
-			long f2 = fibonnaciList.get(i - 1);
-			if (f1 + f2 > n) {
-				break;
+		while (left <= right) {
+			int mid = (left + right) / 2;
+			if (fibonacci[mid] <= n) {
+				left = mid + 1;
+			} else {
+				right = mid - 1;
 			}
-			fibonnaciList.add(f1 + f2);
 		}
-		return fibonnaciList;
+		return fibonacci[right];
 	}
 }
 
-// n 입력
-// n 보다 작거나 같은 피보나치 수 구하기 (이분 탐색) logn
-// stack에 더하기
-// 위 과정을 n == 0 일떄까지 반복
-// n == 0 이면 stack size 출력, stack pop 하면서 결과 출력
-// n: long 타입
-
-// O(nlogn)
-
-// 14:43
+// dp[86] > 10^18
+// sum[85] > 10^18
