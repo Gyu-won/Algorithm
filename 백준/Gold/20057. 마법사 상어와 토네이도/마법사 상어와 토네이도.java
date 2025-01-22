@@ -1,21 +1,19 @@
-import java.awt.*;
-import java.sql.SQLOutput;
-import java.time.Month;
-import java.util.*;
-import java.io.*;
-import java.util.List;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.StringTokenizer;
 
 class Main {
 
-	private static final int[] dr = new int[]{0, 1, 0, -1};
-	private static final int[] dc = new int[]{-1, 0, 1, 0};
-	private static final int[][][] spreadRate = new int[][][]{
+	private static final int RATIO_DIVISOR = 100;
+	private static final int[] dr = new int[] {0, 1, 0, -1};
+	private static final int[] dc = new int[] {-1, 0, 1, 0};
+	private static final int[][][] SPREAD_RATIO = new int[][][] {
 		{
 			{0, 0, 2, 0, 0},
 			{0, 10, 7, 1, 0},
 			{5, 0, 0, 0, 0},
 			{0, 10, 7, 1, 0},
-			{0, 0, 2, 0, 0}
+			{0, 0, 2, 0, 0},
 		},
 		{
 			{0, 0, 0, 0, 0},
@@ -36,103 +34,81 @@ class Main {
 			{0, 10, 0, 10, 0},
 			{2, 7, 0, 7, 2},
 			{0, 1, 0, 1, 0},
-			{0, 0, 0, 0, 0}
+			{0, 0, 0, 0, 0},
 		}
 	};
 
-	private static int n, outSand;
-	private static int[][] board;
+	private static int n, r, c;
+	private static int[][] sand;
 
 	public static void main(String[] args) throws Exception {
+		// n 입력
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		StringTokenizer st = new StringTokenizer(br.readLine());
+		n = Integer.parseInt(br.readLine());
 
-		n = Integer.parseInt(st.nextToken());
-
-		board = new int[n][n];
+		// sand[r][c] 입력
+		StringTokenizer st;
+		sand = new int[n][n];
 		for (int i = 0; i < n; i++) {
 			st = new StringTokenizer(br.readLine());
 			for (int j = 0; j < n; j++) {
-				board[i][j] = Integer.parseInt(st.nextToken());
+				sand[i][j] = Integer.parseInt(st.nextToken());
 			}
 		}
 
-		boolean[][] visited = new boolean[n][n];
-		int r = n/2, c = n/2, direction = 0;
-		visited[r][c] = true;
-
-		while (true) {
-			int currentD = direction % 4;
-			int nextR = r + dr[currentD];
-			int nextC = c + dc[currentD];
-
-			if (visited[nextR][nextC]){
-				direction += 3;
-				currentD = direction % 4;
-				nextR = r + dr[currentD];
-				nextC = c + dc[currentD];
-
-				if (!isBoard(nextR, nextC)){
-					break;
-				}
+		// move(): O(n^2)
+		r = n / 2;
+		c = n / 2;
+		int totalOutedSand = 0, direction = 0, distance = 0;
+		for (int i = 0; i < 2 * n - 1; i++) {
+			if (i % 2 == 0 && i < 2 * (n - 1)) {
+				distance++;
 			}
-			r = nextR;
-			c = nextC;
-			visited[r][c] = true;
-			spread(currentD, r, c);
-			direction++;
-		}
+			for (int j = 0; j < distance; j++) {
+				move(direction);
 
-		System.out.println(outSand);
+				// wind(direction): O(25)
+				totalOutedSand += wind(direction);
+			}
+			direction = (direction + 1) % 4;
+		}
+		System.out.println(totalOutedSand);
 	}
 
-	private static boolean isBoard(int r, int c) {
-		return r >= 0 && r < n && c >= 0 && c < n;
+	private static void move(int d) {
+		r += dr[d];
+		c += dc[d];
 	}
 
-	private static void spread(int d, int r, int c) {
-		int totalSand = board[r][c];
-		for (int i = r - 2; i <= r + 2; i++) {
-			for (int j = c - 2; j <= c + 2; j++) {
-				int rate = spreadRate[d][i -r + 2][j-c +2];
-				int addedSand = totalSand * rate / 100;
-				if (isBoard(i, j)){
-					board[i][j] += addedSand;
-				}else{
-					outSand += addedSand;
+	private static int wind(int d) {
+		int outedSand = 0;
+		int originalSand = sand[r][c];
+		for (int i = 0; i < 5; i++) {
+			for (int j = 0; j < 5; j++) {
+				int spreadedSand = originalSand * SPREAD_RATIO[d][i][j] / RATIO_DIVISOR;
+
+				int realR = r - 2 + i;
+				int realC = c - 2 + j;
+				if (isOut(realR, realC)) {
+					outedSand += spreadedSand;
+				} else {
+					sand[realR][realC] += spreadedSand;
 				}
-				board[r][c] -= addedSand;
+				sand[r][c] -= spreadedSand;
 			}
 		}
-
-		int nextR = r + dr[d];
-		int nextC = c + dc[d];
-		if (isBoard(nextR, nextC)){
-			board[nextR][nextC] += board[r][c];
-		} else{
-			outSand += board[r][c];
+		int alphaR = r + dr[d];
+		int alphaC = c + dc[d];
+		if (isOut(alphaR, alphaC)) {
+			outedSand += sand[r][c];
+		} else {
+			sand[alphaR][alphaC] += sand[r][c];
 		}
+		sand[r][c] = 0;
+		return outedSand;
+	}
+
+	private static boolean isOut(int nextR, int nextC) {
+		return nextR < 0 || nextC < 0 || nextR >= n || nextC >= n;
 	}
 }
-
-// n 입력
-// int[n][n] board 입력
-// visited[n/2][n/2] = true
-// 처음 direction = 0
-// while ()
-	// direction % 4로 다음 위치 계산
-	// visited[] false 면 -> 이동, spread, 방향 ++
-	// visited[] true 면 (direction - 1) % 4 로 계산
-		// canMove() true 면 이동, spread
-		// canMove() false면 종료
-// outSand 출력;
-
-// spread(direction, r, c)
-	// 방향에 따라 모래 퍼뜨리기
-		// 범위 확인
-			// 벗어나면 outSand에 더하기
-			// 안이면 해당 값 더하기
-		// y - restSand를 a로 이동
-
-
-// 구현 O(n*n25)
