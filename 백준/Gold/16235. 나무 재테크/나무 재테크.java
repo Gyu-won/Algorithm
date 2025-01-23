@@ -1,138 +1,172 @@
-import java.util.*;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.List;
+import java.util.StringTokenizer;
 
 class Main {
 
-	private static final int DIRECTION = 8;
-	private static final int[] dr = {-1, -1, -1, 0, 1, 1, 1, 0};
-	private static final int[] dc = {-1, 0, 1, 1, 1, 0, -1, -1};
+	private static final int[] dr = new int[] {-1, -1, -1, 0, 0, 1, 1, 1,};
+	private static final int[] dc = new int[] {-1, 0, 1, -1, 1, -1, 0, 1,};
 
-	private static int n;
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) throws IOException {
+		// n, m, k 입력
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		StringTokenizer st = new StringTokenizer(br.readLine());
 
-		n = Integer.parseInt(st.nextToken());
+		int n = Integer.parseInt(st.nextToken());
 		int m = Integer.parseInt(st.nextToken());
 		int k = Integer.parseInt(st.nextToken());
 
-		int[][] a = new int[n+1][n+1];
-		int[][] nutrient = new int[n+1][n+1];
-		List<Integer>[][] treeMap = new ArrayList[n+1][n+1];
-		for (int i = 1; i <= n; i++) {
+		// nutrient[n][n] 입력
+		int[][] nutrient = new int[n][n];
+		for (int r = 0; r < n; r++) {
 			st = new StringTokenizer(br.readLine());
-			for (int j = 1; j <= n; j++) {
-				a[i][j] = Integer.parseInt(st.nextToken());
-				nutrient[i][j] = 5;
-				treeMap[i][j] = new ArrayList<>();
+			for (int c = 0; c < n; c++) {
+				nutrient[r][c] = Integer.parseInt(st.nextToken());
+			}
+		}
+
+		// TreeBoard 입력
+		Deque<Integer>[][] treeBoard = new ArrayDeque[n][n];
+		List<Integer>[][] treeBoardForOrder = new ArrayList[n][n];
+		for (int r = 0; r < n; r++) {
+			for (int c = 0; c < n; c++) {
+				treeBoard[r][c] = new ArrayDeque<>();
+				treeBoardForOrder[r][c] = new ArrayList<>();
 			}
 		}
 
 		for (int i = 0; i < m; i++) {
 			st = new StringTokenizer(br.readLine());
-			int r = Integer.parseInt(st.nextToken());
-			int c = Integer.parseInt(st.nextToken());
+			int r = Integer.parseInt(st.nextToken()) - 1;
+			int c = Integer.parseInt(st.nextToken()) - 1;
 			int age = Integer.parseInt(st.nextToken());
-
-			treeMap[r][c].add(age);
+			treeBoardForOrder[r][c].add(age);
 		}
 
-		for (int i = 0; i < k; i++) {
-			springAndSummer(nutrient, treeMap);
-			fall(treeMap);
-			winter(a, nutrient);
-		}
-
-		int totalTree = 0;
-		for (int i = 1; i <= n; i++) {
-			for (int j = 1; j <= n; j++) {
-				totalTree += treeMap[i][j].size();
+		// TreeBoard 정렬, ground 세팅
+		int[][] ground = new int[n][n];
+		for (int r = 0; r < n; r++) {
+			for (int c = 0; c < n; c++) {
+				ground[r][c] = 5;
+				Collections.sort(treeBoardForOrder[r][c]);
+				for (int age : treeBoardForOrder[r][c]) {
+					treeBoard[r][c].addLast(age);
+				}
 			}
 		}
-		System.out.println(totalTree);
+
+		// k 번 반복
+		int year = 1;
+		while (year <= k) {
+			List<Tree> dieList = spring(n, ground, treeBoard);
+			summer(ground, dieList);
+			fall(n, treeBoard);
+			winter(n, ground, nutrient);
+			year++;
+		}
+
+		// 살아있는 나무 숫자 구하기
+		int numberOfTree = 0;
+		for (int r = 0; r < n; r++) {
+			for (int c = 0; c < n; c++) {
+				numberOfTree += treeBoard[r][c].size();
+			}
+		}
+		System.out.println(numberOfTree);
 	}
 
-	private static void springAndSummer(int[][] nutrient, List<Integer>[][] treeMap){
-		for (int i = 1; i <= n; i++) {
-			for (int j = 1; j <= n; j++){
-				int idx = 0;
-				List<Integer> newTreeMap = new ArrayList<>();
-				for (; idx < treeMap[i][j].size(); idx++) {
-					int treeAge = treeMap[i][j].get(idx);
-					if (treeAge > nutrient[i][j]) {
-						break;
+	private static List<Tree> spring(int n, int[][] ground, Deque<Integer>[][] treeBoard) {
+		// spring: 각 칸을 돌면서 어린 나무부터 나이만큼 나무 먹고, 나이 증가, 뒤에 나무는 그대로 제거 후 dieList insert
+		List<Tree> dieList = new ArrayList<>();
+		for (int r = 0; r < n; r++) {
+			for (int c = 0; c < n; c++) {
+				Deque<Integer> treeQueue = treeBoard[r][c];
+				int size = treeQueue.size();
+				for (int t = 0; t < size; t++) {
+					int age = treeQueue.removeFirst();
+					if (age <= ground[r][c]) {
+						ground[r][c] -= age;
+						treeQueue.addLast(age + 1);
+					} else {
+						dieList.add(new Tree(r, c, age));
 					}
-					nutrient[i][j] -= treeAge;
-					newTreeMap.add(treeAge + 1);
 				}
-				for (; idx < treeMap[i][j].size(); idx++) {
-					int treeAge = treeMap[i][j].get(idx);
-					nutrient[i][j] += treeAge/2;
-				}
-				treeMap[i][j] = newTreeMap;
 			}
+		}
+		return dieList;
+	}
+
+	private static void summer(int[][] ground, List<Tree> dieList) {
+		// summer: dieList에 있는 나무들 ground[r][c]에 추가
+		for (Tree tree : dieList) {
+			ground[tree.r][tree.c] += tree.age / 2;
 		}
 	}
 
-	private static void fall(List<Integer>[][] treeMap) {
-		int[][] newTree = new int[n + 1][n + 1];
-		for (int i = 1; i <= n; i++) {
-			for (int j = 1; j <= n; j++) {
-				for (int treeAge : treeMap[i][j]) {
-					if (treeAge % 5 == 0) {
-						spread(i, j, newTree);
+	private static void fall(int n, Deque<Integer>[][] treeBoard) {
+		// fall: 나무 순회하면서(list) 5의 배수이면 옆에 deque의 앞에 추가
+		for (int r = 0; r < n; r++) {
+			for (int c = 0; c < n; c++) {
+				Deque<Integer> treeQueue = treeBoard[r][c];
+				int size = treeQueue.size();
+				for (int t = 0; t < size; t++) {
+					int age = treeQueue.removeFirst();
+					if (age % 5 == 0) {
+						spread(n, r, c, treeBoard);
 					}
+					treeQueue.addLast(age);
 				}
 			}
 		}
-		plant(newTree, treeMap);
 	}
 
-	private static void winter(int[][] a, int[][] nutrient) {
-		for (int i = 1; i <= n; i++) {
-			for (int j = 1; j <= n; j++) {
-				nutrient[i][j] += a[i][j];
-			}
-		}
-	}
-
-	private static void spread(int r, int c, int[][] newTree){
-		for (int d = 0; d < DIRECTION; d++) {
+	private static void spread(int n, int r, int c, Deque<Integer>[][] treeBoard) {
+		for (int d = 0; d < 8; d++) {
 			int nextR = r + dr[d];
 			int nextC = c + dc[d];
 
-			if (nextR > 0 && nextR <= n && nextC > 0 && nextC <= n) {
-				newTree[nextR][nextC]++;
+			if (isValid(n, nextR, nextC)) {
+				treeBoard[nextR][nextC].addFirst(1);
 			}
 		}
 	}
 
-	private static void plant(int[][] newTree, List<Integer>[][] treeMap) {
-		for (int i = 1; i <= n; i++) {
-			for (int j = 1; j <= n; j++) {
-				if (newTree[i][j] > 0) {
-					List<Integer> trees = Collections.nCopies(newTree[i][j], 1);
-					treeMap[i][j].addAll(0, trees);
-				}
+	private static boolean isValid(int n, int r, int c) {
+		return r >= 0 && r < n && c >= 0 && c < n;
+	}
+
+	private static void winter(int n, int[][] ground, int[][] nutrient) {
+		// 겨울: 양분 추가 O(n * n)
+		for (int r = 0; r < n; r++) {
+			for (int c = 0; c < n; c++) {
+				ground[r][c] += nutrient[r][c];
 			}
+		}
+	}
+
+	// Tree: r, c, age
+	private static class Tree {
+		private final int r;
+		private final int c;
+		private final int age;
+
+		Tree(int r, int c, int age) {
+			this.r = r;
+			this.c = c;
+			this.age = age;
 		}
 	}
 }
 
-// n, m, k 입력
-// Deque<Integer>[n][n] map 입력
-// int[n][n] gradient 입력
-// m번 나무 생성
-// k년 반복
-	// grow: 양분이랑 비교해서 + 1,
-	// die: grow 종료되면 removeLast 하면서 양분에 더하기
-	// spread: 이중 for문 돌며 번식하기
-	// addGradient: 양분 추가
+// O(전체 나무 순회 * k) < O(100000 * 1000)
 
-// 15:00
-// 봄: 나이 어린 나무부터 나이만큼 양분 먹고 나이 1 증가, 못먹으면 죽음
-// 여름: 죽은 나무 나이 / 2 값이 양분으로 추가
-// 가을: 나이가 5의 배수이면 인접 8개 칸에 번식
-// 겨울: A[r][c] 만큼 양분 추가
-// 결과: k년이 지난 후 살아있는 나무 개수
-// n, m, k
+// 봄(grow): 어린 나무부터 나이만큼 양분 먹기, 나이 1 증가, 못먹은 나무는 죽음
+// 여름(die): 죽은 나무 나이 / 2가 양분으로 추가
+// 가을(spread): 나무 나이 5의 배수이면 8개의 인접칸에 1인 나무 생김
+// 겨울(feed): a[r][c] 만큼 양분 추가
