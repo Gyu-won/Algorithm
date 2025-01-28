@@ -6,24 +6,18 @@ class Solution {
         int sortIdx = Field.getIdxFromName(sort_by);
         
         // 뽑기 O(500)
-        Map<Integer, int[]> sortValueMap = new HashMap<>();
+        List<int[]> selectedRow = new ArrayList<>();
         for (int[] row: data) {
             if (row[selectionIdx] < val_ext) {
-                sortValueMap.put(row[sortIdx], row);
+                selectedRow.add(row);
             }
         }
         
         // 정렬 O(log500)
-        List<Integer> sortKeys = new ArrayList<>(sortValueMap.keySet());
-        Collections.sort(sortKeys);
+        selectedRow.sort((a, b) -> a[sortIdx] - b[sortIdx]);
         
         // int 형으로 변환
-        int[][] answer = new int[sortKeys.size()][4];
-        int idx = 0;
-        for (int key: sortKeys) {
-            answer[idx++] = sortValueMap.get(key);
-        }
-        return answer;
+        return selectedRow.toArray(new int[selectedRow.size()][4]);
     }
     
     static enum Field {
