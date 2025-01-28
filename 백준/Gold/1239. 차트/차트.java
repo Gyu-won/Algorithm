@@ -52,13 +52,10 @@ class Main {
 			chartSum[i] += chartSum[i - 1] + chart.get(i);
 		}
 
-		for (int i = 0; i < n; i++) {
-			if (chartSum[i] <= 50) {
-				int target = chartSum[i] + 50;
-				for (int j = i + 1; j < n && chartSum[j] <= target; j++) {
-					if (chartSum[j] == target) {
-						numberOfLine++;
-					}
+		for (int i = 0; i < n - 1; i++) {
+			for (int j = i + 1; j < n; j++) {
+				if (chartSum[j] - chartSum[i] == 50) {
+					numberOfLine++;
 				}
 			}
 		}
