@@ -4,7 +4,7 @@ class Solution {
         int[] answer = new int[difference + 1];
         int idx = 0;
         for (long i = left; i <= right; i++) {
-            int row = (int) (i / (long) n);
+            int row = (int) (i / n);
             int col = (int) (i % (long) n);
             
             if (col <= row) {
