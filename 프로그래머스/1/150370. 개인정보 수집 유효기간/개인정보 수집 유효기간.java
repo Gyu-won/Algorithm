@@ -33,11 +33,7 @@ class Solution {
             }
         }
         
-        int[] answer = new int[answerList.size()];
-        for (int i = 0; i < answer.length; i++) {
-            answer[i] = answerList.get(i);
-        }
-        return answer;
+        return answerList.stream().mapToInt(a -> a).toArray();
     }
     
     // 날짜 변화 ((년도-2000)*28*13 + 월*28 + 일자 - 1)
