@@ -10,7 +10,16 @@ class Solution {
     private boolean[][][] visited;
     
     // <= 500*500
-    public int[] solution(String[] grid) {
+    public int[] solution(String[] grid) {        
+        init(grid);
+        List<Integer> result = calculateResult();
+        Collections.sort(result);
+        return result.stream()
+            .mapToInt(Integer::intValue)
+            .toArray();
+    }
+    
+    private void init(String[] grid) {
         n = grid.length;
         m = grid[0].length();
         
@@ -22,7 +31,9 @@ class Solution {
                 board[i][j] = grid[i].charAt(j);
             }
         }
-        
+    }
+    
+    private List<Integer> calculateResult() {
         List<Integer> result = new ArrayList<>();
         for (int r = 0; r < n; r++) {
             for (int c = 0; c < m; c++) {
@@ -33,10 +44,7 @@ class Solution {
                 }
             }
         }
-        Collections.sort(result);
-        return result.stream()
-            .mapToInt(Integer::intValue)
-            .toArray();
+        return result;
     }
     
     private int countCycleLength(int r, int c, int d) {
