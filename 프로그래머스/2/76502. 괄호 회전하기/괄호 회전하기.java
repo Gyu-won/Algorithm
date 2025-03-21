@@ -1,55 +1,34 @@
-import java.util.*;
+import java.util.Stack;
 
 class Solution {
-    
-    private int len;
-    private Deque<Character> stringQueue = new ArrayDeque<>();
+    private final Stack<Character> stack = new Stack<>();
 
-    public int solution(String s) {
-        len = s.length();
-        for (char ch: s.toCharArray()) {
-            stringQueue.add(ch);
-        }
-        
-        int count = 0;
-        for (int i = 0; i < len; i++) {
-            rotate();
-            if (isValid(new ArrayDeque<>(stringQueue))) {
-                count++;
+        public int solution(String s) {
+            int answer = 0;
+            StringBuilder stringBuilder = new StringBuilder(s);
+
+            for (int i = 0; i < s.length(); i++) {
+                stringBuilder.append(stringBuilder.charAt(0));
+                stringBuilder.deleteCharAt(0);
+                if (correctParenthesis(stringBuilder.toString().toCharArray()))
+                    answer++;
             }
+            return answer;
         }
-        return count;
-    }
-    
-    private boolean isValid(Deque<Character> queue) {
-        Deque<Character> stack = new ArrayDeque<>();
-        for (int i = 0; i < len; i++) {
-            char ch = queue.removeFirst();
-            queue.addLast(ch);
-            
-            if (ch == ']') {
-                if (stack.isEmpty() || stack.getLast() != '[') {
+
+        private boolean correctParenthesis(char[] s) {
+            for (char c : s) {
+                if (!(check(c, '(', ')') && check(c, '[', ']') && check(c, '{', '}')))
                     return false;
-                }
-                stack.removeLast();
-            } else if (ch == '}') {
-                if (stack.isEmpty() || stack.getLast() != '{') {
-                    return false;
-                }
-                stack.removeLast();
-            }else if (ch == ')') {
-                if (stack.isEmpty() || stack.getLast() != '(') {
-                    return false;
-                }
-                stack.removeLast();
-            } else {
-                stack.addLast(ch);    
             }
-        }    
-        return stack.isEmpty();
-    }
-    
-    private void rotate() {
-        stringQueue.addLast(stringQueue.removeFirst());
-    }
+            return stack.isEmpty();
+        }
+
+        private boolean check(char c, char a, char b) {
+            if (c == a)
+                stack.push(a);
+            else if (c == b)
+                if (!stack.isEmpty() && stack.peek() == a) stack.pop(); else return false;
+            return true;
+        }
 }
